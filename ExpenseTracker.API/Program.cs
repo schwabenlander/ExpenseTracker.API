@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Register the database context. 
 builder.Services.AddDbContext<ExpenseDb>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -23,8 +22,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.MapGet("/", () => "Hello World!");
 
 app.MapGet("/expenses", async (ExpenseDb db) => 
     await db.ExpenseItems.ToListAsync());
@@ -49,7 +46,7 @@ app.MapPut("/expenses/{id:int}", async (int id, ExpenseItem expense, ExpenseDb d
     if (savedExpense is null)
         return Results.NotFound();
 
-    savedExpense.Description = expense.Description;
+    savedExpense.Title = expense.Title;
     savedExpense.Amount = expense.Amount;
     savedExpense.Date = expense.Date.Date;
 
@@ -77,7 +74,7 @@ class ExpenseItem
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    public string Description { get; set; }
+    public string Title { get; set; }
 
     public decimal Amount { get; set; }
 
@@ -91,4 +88,13 @@ class ExpenseDb : DbContext
     }
 
     public DbSet<ExpenseItem> ExpenseItems { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ExpenseItem>().HasData(
+            new ExpenseItem { Id = 1, Title = "Toilet Paper", Amount = 24.14m, Date = new DateTime(2020, 8, 14) },
+            new ExpenseItem { Id = 2, Title = "New TV", Amount = 799.49m, Date = new DateTime(2021, 3, 12) },
+            new ExpenseItem { Id = 3, Title = "Cable Internet", Amount = 94.67m, Date = new DateTime(2021, 3, 28) },
+            new ExpenseItem { Id = 4, Title = "New Desk (Wooden)", Amount = 450.00m, Date = new DateTime(2021, 5, 12) });
+    }
 }

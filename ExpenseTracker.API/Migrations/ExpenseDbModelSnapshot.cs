@@ -35,13 +35,43 @@ namespace ExpenseTracker.API.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("ExpenseItems");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 24.14m,
+                            Date = new DateTime(2020, 8, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Title = "Toilet Paper"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 799.49m,
+                            Date = new DateTime(2021, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Title = "New TV"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amount = 94.67m,
+                            Date = new DateTime(2021, 3, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Title = "Cable Internet"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Amount = 450.00m,
+                            Date = new DateTime(2021, 5, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Title = "New Desk (Wooden)"
+                        });
                 });
 #pragma warning restore 612, 618
         }
