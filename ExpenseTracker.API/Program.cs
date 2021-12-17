@@ -8,6 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ExpenseDb>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed((host) => true)
+            .AllowAnyHeader());
+});
+
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -22,14 +33,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 
-app.MapGet("/expenses", async (ExpenseDb db) => 
+app.MapGet("/api/expenses", async (ExpenseDb db) => 
     await db.ExpenseItems.ToListAsync());
 
-app.MapGet("/expenses/year/{year:int}", async (int year, ExpenseDb db) =>
+app.MapGet("/api/expenses/year/{year:int}", async (int year, ExpenseDb db) =>
     await db.ExpenseItems.Where(expense => expense.Date.Year == year).ToListAsync());
 
-app.MapPost("/expenses", async (ExpenseItem expense, ExpenseDb db) =>
+app.MapPost("/api/expenses", async (ExpenseItem expense, ExpenseDb db) =>
 {
     expense.Id = default(int);
     expense.Date = expense.Date.Date;
@@ -39,7 +51,7 @@ app.MapPost("/expenses", async (ExpenseItem expense, ExpenseDb db) =>
     return Results.Created($"/expenses/{expense.Id}", expense);
 });
 
-app.MapPut("/expenses/{id:int}", async (int id, ExpenseItem expense, ExpenseDb db) => 
+app.MapPut("/api/expenses/{id:int}", async (int id, ExpenseItem expense, ExpenseDb db) => 
 { 
     var savedExpense = await db.ExpenseItems.FindAsync(id);
 
@@ -55,7 +67,7 @@ app.MapPut("/expenses/{id:int}", async (int id, ExpenseItem expense, ExpenseDb d
     return Results.NoContent();
 });
 
-app.MapDelete("/expenses/{id:int}", async (int id, ExpenseDb db) =>
+app.MapDelete("/api/expenses/{id:int}", async (int id, ExpenseDb db) =>
 {
     if (await db.ExpenseItems.FindAsync(id) is ExpenseItem expense)
     {
