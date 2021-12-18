@@ -36,7 +36,7 @@ app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 app.MapGet("/api/expenses", async (ExpenseDb db) => 
-    await db.ExpenseItems.ToListAsync())
+    await db.ExpenseItems.OrderByDescending(e => e.Date).ThenByDescending(e => e.Id).ToListAsync())
     .WithName("GetAllExpenses");
 
 app.MapGet("/api/expenses/{id:int}", async (int id, ExpenseDb db) =>
@@ -50,7 +50,7 @@ app.MapGet("/api/expenses/{id:int}", async (int id, ExpenseDb db) =>
     .WithName("GetExpenseById");
 
 app.MapGet("/api/expenses/year/{year:int}", async (int year, ExpenseDb db) =>
-    await db.ExpenseItems.Where(expense => expense.Date.Year == year).ToListAsync())
+    await db.ExpenseItems.Where(expense => expense.Date.Year == year).OrderByDescending(e => e.Date).ThenByDescending(e => e.Id).ToListAsync())
     .WithName("GetExpensesByYear");
 
 app.MapPost("/api/expenses", async (ExpenseItem expense, ExpenseDb db) =>
